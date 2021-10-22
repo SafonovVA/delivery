@@ -1,0 +1,7 @@
+GET {{host}}/couriers?free=true
+Accept: application/json
+
+###
+GET {{host}}/orders/51
+Accept: application/json
+

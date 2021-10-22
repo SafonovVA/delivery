@@ -1,0 +1,421 @@
+openapi: 3.0.0
+info:
+  title: 'Delivery documentation'
+  description: 'API for Delivery'
+  version: 1.0.0
+servers:
+  -
+    url: 'http://localhost:81'
+    description: 'Stage Server'
+paths:
+  /api/couriers:
+    get:
+      tags:
+        - Courier
+      summary: 'Список курьеров'
+      description: 'Возращает список курьеров'
+      operationId: courierIndex
+      parameters:
+        -
+          name: free
+          in: query
+          description: 'Только свободные'
+          required: false
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: 'Список курьеров'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Courier'
+                type: object
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    default: false
+                  errors:
+                    type: object
+                type: object
+  /api/orders:
+    get:
+      tags:
+        - Orders
+      summary: 'Массив заказов'
+      description: 'Возращает массив заказов'
+      operationId: ordersIndex
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OrderCollection'
+                type: object
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    default: false
+                  errors:
+                    type: object
+                type: object
+        403:
+          description: Forbidden
+    post:
+      tags:
+        - Orders
+      summary: 'Создание модели заказа'
+      description: 'Возращает созданную модель заказа'
+      operationId: ordersCreate
+      requestBody:
+        $ref: '#/components/requestBodies/CreateOrderRequest'
+      responses:
+        200:
+          description: 'Создание модели заказа'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  data:
+                    $ref: '#/components/schemas/OrderResource'
+                type: object
+        401:
+          description: 'Неавторизированный пользователь'
+        404:
+          description: 'Invalid data'
+      security:
+        -
+          bearerAuth: []
+  '/api/orders/{id}':
+    get:
+      tags:
+        - Orders
+      summary: 'Детали заказа'
+      description: 'Возращает заказ'
+      operationId: ordersShow
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'Id заказа'
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  data:
+                    $ref: '#/components/schemas/OrderResource'
+                type: object
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    default: false
+                  errors:
+                    type: object
+                type: object
+        403:
+          description: Forbidden
+    patch:
+      tags:
+        - Orders
+      summary: 'Изменение модели заказа'
+      description: 'Возращает измененную модель заказа'
+      operationId: ordersUpdate
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'Id заказа'
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateOrderRequest'
+      responses:
+        200:
+          description: 'Изменение модели заказа'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  data:
+                    $ref: '#/components/schemas/OrderResource'
+                type: object
+        401:
+          description: 'Неавторизированный пользователь'
+        404:
+          description: 'Invalid data'
+      security:
+        -
+          bearerAuth: []
+  '/api/orders/{courierId}/history':
+    get:
+      tags:
+        - Orders
+      summary: 'Список выполненных курьером заказов'
+      description: 'Возращает список выполненных курьером заказов'
+      operationId: ordersHistory
+      parameters:
+        -
+          name: courierId
+          in: path
+          description: 'Id курьера'
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OrderCollection'
+                type: object
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    default: false
+                  errors:
+                    type: object
+                type: object
+        403:
+          description: Forbidden
+components:
+  schemas:
+    OrderCollection:
+      description: 'Order collection'
+      properties:
+        id:
+          description: 'Id заказа'
+          type: integer
+        description:
+          description: Описание
+          type: string
+        price:
+          description: Цена
+          type: number
+        accepted_at:
+          description: 'Дата принятия заказа в отделение курьерской службы'
+          type: string
+        delivered_at:
+          description: 'Дата доставки заказа в точку назначения'
+          type: string
+        created_at:
+          description: 'Дата создания'
+          type: string
+        updated_at:
+          description: 'Дата обновления'
+          type: string
+        coordinates:
+          description: Координаты
+          properties:
+            latitude:
+              description: Широта
+              type: string
+            longitude:
+              description: Долгота
+              type: string
+          type: object
+      type: object
+      xml:
+        name: OrderCollection
+    OrderResource:
+      description: 'Order resource'
+      properties:
+        id:
+          description: 'Id заказа'
+          type: integer
+        description:
+          description: Описание
+          type: string
+        price:
+          description: Цена
+          type: number
+        accepted_at:
+          description: 'Дата принятия заказа в отделение курьерской службы'
+          type: string
+        delivered_at:
+          description: 'Дата доставки заказа в точку назначения'
+          type: string
+        created_at:
+          description: 'Дата создания'
+          type: string
+        updated_at:
+          description: 'Дата обновления'
+          type: string
+        coordinates:
+          description: Координаты
+          properties:
+            latitude:
+              description: Широта
+              type: string
+            longitude:
+              description: Долгота
+              type: string
+          type: object
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        courier:
+          $ref: '#/components/schemas/Courier'
+      type: object
+      xml:
+        name: OrderResource
+    Courier:
+      description: 'Courier model'
+      properties:
+        id:
+          description: 'Id курьера'
+          type: integer
+        credentials:
+          description: ФИО
+          type: string
+        phone:
+          description: Телефон
+          type: string
+      type: object
+      xml:
+        name: Courier
+    Order:
+      description: 'Order model'
+      properties:
+        id:
+          description: 'Id заказа'
+          type: integer
+        description:
+          description: Описание
+          type: string
+        price:
+          description: Цена
+          type: number
+        accepted_at:
+          description: 'Дата принятия заказа в отделение курьерской службы'
+          type: string
+        delivered_at:
+          description: 'Дата доставки заказа в точку назначения'
+          type: string
+        created_at:
+          description: 'Дата создания'
+          type: string
+        updated_at:
+          description: 'Дата обновления'
+          type: string
+      type: object
+      xml:
+        name: Order
+    OrderStatus:
+      description: 'Order status model'
+      properties:
+        id:
+          description: 'Id статуса'
+          type: integer
+        name:
+          description: Название
+          type: string
+      type: object
+      xml:
+        name: OrderStatus
+  requestBodies:
+    CreateOrderRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            properties:
+              description:
+                description: 'Описание заказа'
+                type: string
+              price:
+                description: Цена
+                type: number
+              accepted_at:
+                description: 'Дата принятия заказа в отделение курьерской службы'
+                type: string
+              delivered_at:
+                description: 'Дата доставки заказа в точку назначения'
+                type: string
+              coordinates:
+                description: 'Координаты в формате latitude:longitude'
+                type: string
+              order_status_id:
+                description: 'ID статуса заказа'
+                type: integer
+              courier_id:
+                description: 'ID курьера'
+                type: integer
+            type: object
+    UpdateOrderRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            properties:
+              order_status_id:
+                description: 'ID статуса заказа'
+                type: integer
+              courier_id:
+                description: 'ID курьера'
+                type: integer
+            type: object
+  securitySchemes:
+    bearerAuth:
+      type: http
+      description: 'Токен авторизации'
+      scheme: bearer
+security:
+  - []

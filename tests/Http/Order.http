@@ -1,0 +1,26 @@
+GET {{host}}/orders
+Accept: application/json
+
+###
+GET {{host}}/orders/51
+Accept: application/json
+
+###
+POST {{host}}/orders
+Content-Type: application/json
+
+{
+    "description": "Some Description",
+    "price": 123.52,
+    "coordinates": "-90.000:-180.0000"
+}
+###
+/*
+ * 'description' => 'required|string',
+'price' => 'required|numeric',
+'accepted_at' => 'date',
+'coordinates' => 'required|regex:/^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?):*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/',
+'order_status_id' => 'exists:order_statuses,id',
+'courier_id' => 'integer|required_unless:order_status_id,1',
+'delivered_at' => 'date|required_if:order_status_id,3',
+ */
