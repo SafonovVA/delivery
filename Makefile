@@ -19,7 +19,6 @@ build:
         composer install --ignore-platform-reqs
 	cp .env.example .env
 	${sail} up -d
-	${sail} composer i
 	${sail} artisan key:generate
 	${sail} artisan migrate:fresh --seed
 
